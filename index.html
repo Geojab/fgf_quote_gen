@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Good Flowers Quotation</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#85837a">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Field Good Flowers Quotation</h1>
+            <div class="quote-management">
+                <button id="save-quote-btn" class="management-btn save-btn">💾 Save Quote</button>
+                <button id="load-quote-btn" class="management-btn load-btn">📂 Load Quote</button>
+                <button id="new-quote-btn" class="management-btn new-btn">✨ New Quote</button>
+            </div>
+            <nav class="stage-nav">
+                <button class="stage-btn active" data-stage="wedding">Wedding Details</button>
+                <button class="stage-btn" data-stage="flowers">Flowers</button>
+                <button class="stage-btn" data-stage="items">Items</button>
+                <button class="stage-btn" data-stage="assignment">Assignment</button>
+                <button class="stage-btn" data-stage="pricing">Pricing</button>
+                <button class="stage-btn" data-stage="quote">Quote</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Stage 0: Wedding Details -->
+            <div id="wedding-stage" class="stage active">
+                <h2>Wedding Details</h2>
+                <p>Please provide the basic information about the wedding:</p>
+                
+                <div class="wedding-form">
+                    <div class="form-section">
+                        <h3>Couple Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bride-name">Bride's Name:</label>
+                                <input type="text" id="bride-name" placeholder="Enter bride's name" onchange="updateWeddingDetail('brideName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label for="groom-name">Groom's Name:</label>
+                                <input type="text" id="groom-name" placeholder="Enter groom's name" onchange="updateWeddingDetail('groomName', this.value)">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="wedding-date">Wedding Date:</label>
+                                <input type="date" id="wedding-date" onchange="updateWeddingDetail('weddingDate', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-email">Contact Email:</label>
+                                <input type="email" id="contact-email" placeholder="Enter contact email" onchange="updateWeddingDetail('contactEmail', this.value)">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="contact-phone">Contact Phone:</label>
+                                <input type="tel" id="contact-phone" placeholder="Enter contact phone" onchange="updateWeddingDetail('contactPhone', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <!-- Empty div for spacing -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Wedding Ceremony</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="wedding-venue">Venue/Location:</label>
+                                <input type="text" id="wedding-venue" placeholder="Enter wedding venue" onchange="updateWeddingDetail('weddingVenue', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label for="wedding-time">Time:</label>
+                                <input type="time" id="wedding-time" onchange="updateWeddingDetail('weddingTime', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Reception</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reception-venue">Venue/Location:</label>
+                                <input type="text" id="reception-venue" placeholder="Enter reception venue" onchange="updateWeddingDetail('receptionVenue', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label for="reception-time">Time:</label>
+                                <input type="time" id="reception-time" onchange="updateWeddingDetail('receptionTime', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Table Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="table-count">Number of Tables:</label>
+                                <input type="number" id="table-count" min="0" placeholder="0" onchange="updateWeddingDetail('tableCount', parseInt(this.value) || 0)">
+                            </div>
+                            <div class="form-group">
+                                <label for="table-shape">Table Shape:</label>
+                                <select id="table-shape" onchange="updateWeddingDetail('tableShape', this.value)">
+                                    <option value="">Select table shape</option>
+                                    <option value="round">Round</option>
+                                    <option value="rectangular">Rectangular</option>
+                                    <option value="square">Square</option>
+                                    <option value="oval">Oval</option>
+                                    <option value="mixed">Mixed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Wedding Brief</h3>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="wedding-brief">Style, Look & Color Scheme:</label>
+                                <textarea id="wedding-brief" 
+                                         placeholder="Describe the overall style, look, and color scheme for the wedding. E.g., 'Romantic garden party with soft pastels, lots of greenery, and a vintage feel. Main colors are blush pink, sage green, and cream.'"
+                                         rows="4"
+                                         onchange="updateWeddingDetail('weddingBrief', this.value)"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 1: Flower Varieties -->
+            <div id="flowers-stage" class="stage">
+                <h2>Flower Varieties</h2>
+                <p>Add all the flower varieties that will be used in this wedding:</p>
+                
+                <div class="add-form">
+                    <input type="text" id="flower-name" placeholder="Enter flower name (e.g., Roses, Peonies, Eucalyptus)">
+                    <button id="add-flower">Add Flower</button>
+                </div>
+                
+                <div class="list-container">
+                    <h3>Selected Flowers:</h3>
+                    <div id="flowers-list" class="items-list">
+                        <!-- Flowers will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 2: Items -->
+            <div id="items-stage" class="stage">
+                <h2>Wedding Items</h2>
+                <p>Add all the items that will be created (bouquets, arrangements, etc.):</p>
+                
+                <div class="add-form">
+                    <input type="text" id="item-name" placeholder="Enter item name (e.g., Bride's Bouquet, Bridesmaid Bouquets)">
+                    <input type="number" id="item-quantity" placeholder="Quantity" min="1" value="1">
+                    <button id="add-item">Add Item</button>
+                </div>
+                
+                <div class="list-container">
+                    <h3>Wedding Items:</h3>
+                    <div id="items-list" class="items-list">
+                        <!-- Items will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 3: Assignment -->
+            <div id="assignment-stage" class="stage">
+                <h2>Flower Assignment</h2>
+                <p>Assign the number of stems for each flower to each item:</p>
+                
+                <div id="assignment-grid" class="assignment-grid">
+                    <!-- Assignment grid will be generated here -->
+                </div>
+                
+                <div class="summary">
+                    <h3>Total Stems Required:</h3>
+                    <div id="total-stems" class="total-stems">
+                        <!-- Summary will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 4: Pricing -->
+            <div id="pricing-stage" class="stage">
+                <h2>Supplier Pricing & Ordering</h2>
+                <p>Set up supplier information for each flower to calculate ordering requirements and costs:</p>
+                
+                <div id="pricing-grid" class="pricing-grid">
+                    <!-- Pricing grid will be generated here -->
+                </div>
+                
+                <div class="order-summary">
+                    <h3>Order Summary:</h3>
+                    <div id="order-totals" class="order-totals">
+                        <!-- Order totals will be displayed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 5: Quote -->
+            <div id="quote-stage" class="stage">
+                <h2>Quote Generation</h2>
+                <p>Set your selling prices for each item and generate the final quote:</p>
+                
+                <div id="quote-grid" class="quote-grid">
+                    <!-- Quote grid will be generated here -->
+                </div>
+                
+                <div class="additional-costs">
+                    <h3>Additional Costs:</h3>
+                    <div class="costs-grid">
+                        <div class="cost-item">
+                            <div class="cost-calculation">
+                                <div class="cost-calculation-left">
+                                    <label for="head-florist-days">Head Florist Days:</label>
+                                    <input type="number" id="head-florist-days" min="0" value="2" onchange="updateAdditionalCost('headFloristDays', parseInt(this.value) || 0)">
+                                    <span>× £<input type="number" id="head-florist-cost" min="0" step="0.01" value="200" onchange="updateAdditionalCost('headFloristCost', parseFloat(this.value) || 0)"> = £<span id="head-florist-total">400.00</span></span>
+                                </div>
+                                <div class="cost-calculation-right">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="head-florist-bundle" checked onchange="updateAdditionalCost('headFloristBundle', this.checked)">
+                                        <span class="checkmark"></span>
+                                        Bundle in "Additional Services"
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cost-item">
+                            <div class="cost-calculation">
+                                <div class="cost-calculation-left">
+                                    <label for="assistant-days">Assistant Florist Days:</label>
+                                    <input type="number" id="assistant-days" min="0" value="1" onchange="updateAdditionalCost('assistantDays', parseInt(this.value) || 0)">
+                                    <span>× £<input type="number" id="assistant-cost" min="0" step="0.01" value="150" onchange="updateAdditionalCost('assistantCost', parseFloat(this.value) || 0)"> = £<span id="assistant-total">150.00</span></span>
+                                </div>
+                                <div class="cost-calculation-right">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="assistant-bundle" checked onchange="updateAdditionalCost('assistantBundle', this.checked)">
+                                        <span class="checkmark"></span>
+                                        Bundle in "Additional Services"
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cost-item">
+                            <div class="cost-calculation">
+                                <div class="cost-calculation-left">
+                                    <label for="mileage">Mileage (miles):</label>
+                                    <input type="number" id="mileage" min="0" step="0.1" value="0" onchange="updateAdditionalCost('mileage', parseFloat(this.value) || 0)">
+                                    <span>× £<input type="number" id="mileage-cost" min="0" step="0.01" value="0.45" onchange="updateAdditionalCost('mileageCost', parseFloat(this.value) || 0)"> × 4 trips = £<span id="mileage-total">0.00</span></span>
+                                </div>
+                                <div class="cost-calculation-right">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="mileage-bundle" checked onchange="updateAdditionalCost('mileageBundle', this.checked)">
+                                        <span class="checkmark"></span>
+                                        Bundle in "Additional Services"
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cost-item">
+                            <div class="cost-calculation">
+                                <div class="cost-calculation-left">
+                                    <label for="overnight-stays">Overnight Stays:</label>
+                                    <input type="number" id="overnight-stays" min="0" value="0" onchange="updateAdditionalCost('overnightStays', parseInt(this.value) || 0)">
+                                    <span>× £<input type="number" id="overnight-cost" min="0" step="0.01" value="0" onchange="updateAdditionalCost('overnightCost', parseFloat(this.value) || 0)"> = £<span id="overnight-total">0.00</span></span>
+                                </div>
+                                <div class="cost-calculation-right">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="overnight-bundle" checked onchange="updateAdditionalCost('overnightBundle', this.checked)">
+                                        <span class="checkmark"></span>
+                                        Bundle in "Additional Services"
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="add-custom-cost">
+                        <button id="add-custom-cost-btn" class="add-cost-btn">+ Add Custom Cost</button>
+                    </div>
+                    
+                    <div id="custom-costs-list" class="custom-costs-list">
+                        <!-- Custom costs will be added here -->
+                    </div>
+                </div>
+                
+                <div class="quote-summary">
+                    <h3>Quote Summary:</h3>
+                    <div id="quote-totals" class="quote-totals">
+                        <!-- Quote totals will be displayed here -->
+                    </div>
+                </div>
+                
+                <div class="quote-actions">
+                    <button id="generate-pdf-btn" class="pdf-action-btn">📄 Generate PDF Quote</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Save Quote Modal -->
+    <div id="save-quote-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Save Quote</h2>
+            <p>Enter a name for this quote:</p>
+            <input type="text" id="quote-name-input" placeholder="e.g., Sarah & John - June Wedding" maxlength="50">
+            <div class="save-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="save-to-browser" checked>
+                    <span class="checkmark"></span>
+                    Save to browser storage
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="download-file" checked>
+                    <span class="checkmark"></span>
+                    Download as file
+                </label>
+            </div>
+            <div class="modal-buttons">
+                <button id="confirm-save-btn" class="btn-primary">Save Quote</button>
+                <button id="cancel-save-btn" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Quote Modal -->
+    <div id="load-quote-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Load Quote</h2>
+            <div class="load-tabs">
+                <button class="tab-btn active" data-tab="browser">Browser Storage</button>
+                <button class="tab-btn" data-tab="file">Upload File</button>
+            </div>
+            
+            <div id="browser-tab" class="tab-content active">
+                <p>Select a saved quote to load:</p>
+                <div id="saved-quotes-list" class="quotes-list">
+                    <!-- Saved quotes will be listed here -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-load-btn" class="btn-primary" disabled>Load Selected Quote</button>
+                    <button id="cancel-load-btn" class="btn-secondary">Cancel</button>
+                    <button id="delete-quote-btn" class="btn-danger" disabled>Delete Selected Quote</button>
+                </div>
+            </div>
+            
+            <div id="file-tab" class="tab-content">
+                <p>Upload a quote file:</p>
+                <div class="file-upload-area">
+                    <input type="file" id="file-input" accept=".json" style="display: none;">
+                    <div class="file-upload-box" onclick="document.getElementById('file-input').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Click to select a quote file</div>
+                        <div class="upload-hint">or drag and drop here</div>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button id="load-file-btn" class="btn-primary" disabled>Load File</button>
+                    <button id="cancel-file-btn" class="btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
