@@ -1369,6 +1369,19 @@ function createQuoteHTML() {
         return html;
     }
 
+    function generateFlowersUsedHTML() {
+        try {
+            const requiredStems = calculateRequiredStems();
+            const usedFlowers = Object.keys(requiredStems).filter(flower => (requiredStems[flower] || 0) > 0);
+            const list = usedFlowers.length > 0 ? usedFlowers : (state.flowers || []);
+            if (!list || list.length === 0) return '';
+            return `<p><strong>Flowers Used:</strong> ${list.join(', ')}</p>`;
+        } catch (e) {
+            const list = state.flowers || [];
+            return list.length ? `<p><strong>Flowers Used:</strong> ${list.join(', ')}</p>` : '';
+        }
+    }
+
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -1747,6 +1760,7 @@ function createQuoteHTML() {
                 <p><strong>Time:</strong> ${wedding.receptionTime || 'TBD'}</p>
                 <p><strong>Tables:</strong> ${wedding.tableCount} ${wedding.tableShape || 'tables'}</p>
                 ${wedding.weddingBrief ? `<p><strong>Style Brief:</strong> ${wedding.weddingBrief}</p>` : ''}
+                ${generateFlowersUsedHTML()}
             </div>
             
             <div class="quote-section">
