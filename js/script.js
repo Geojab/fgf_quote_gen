@@ -71,12 +71,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!state.additionalCosts) state.additionalCosts = {
         headFloristDays: 2,
         headFloristCost: 200,
+        headFloristBundle: true,
         assistantDays: 1,
         assistantCost: 150,
+        assistantBundle: true,
         mileage: 0,
         mileageCost: 0.45,
+        mileageBundle: true,
         overnightStays: 0,
-        overnightCost: 0
+        overnightCost: 0,
+        overnightBundle: true
     };
     if (!state.customCosts) state.customCosts = [];
     
@@ -675,6 +679,23 @@ function updateAdditionalCostTotals() {
     document.getElementById('assistant-total').textContent = (costs.assistantDays * costs.assistantCost).toFixed(2);
     document.getElementById('mileage-total').textContent = (costs.mileage * costs.mileageCost * 4).toFixed(2);
     document.getElementById('overnight-total').textContent = (costs.overnightStays * costs.overnightCost).toFixed(2);
+    
+    // Update form fields and checkboxes
+    document.getElementById('head-florist-days').value = costs.headFloristDays || 2;
+    document.getElementById('head-florist-cost').value = costs.headFloristCost || 200;
+    document.getElementById('head-florist-bundle').checked = costs.headFloristBundle !== false;
+    
+    document.getElementById('assistant-days').value = costs.assistantDays || 1;
+    document.getElementById('assistant-cost').value = costs.assistantCost || 150;
+    document.getElementById('assistant-bundle').checked = costs.assistantBundle !== false;
+    
+    document.getElementById('mileage').value = costs.mileage || 0;
+    document.getElementById('mileage-cost').value = costs.mileageCost || 0.45;
+    document.getElementById('mileage-bundle').checked = costs.mileageBundle !== false;
+    
+    document.getElementById('overnight-stays').value = costs.overnightStays || 0;
+    document.getElementById('overnight-cost').value = costs.overnightCost || 0;
+    document.getElementById('overnight-bundle').checked = costs.overnightBundle !== false;
 }
 
 function getTotalAdditionalCosts() {
@@ -814,7 +835,7 @@ function renderQuoteSummary() {
     
     if (grandTotal > 0) {
         const additionalCosts = getTotalAdditionalCosts();
-        const totalQuoteValue = totalSellingPrice + additionalCosts;
+        const totalQuoteValue = grandTotal + additionalCosts;
         const netProfit = totalProfit; // Only floral profit, additional costs are at cost
         const profitMargin = totalFlowerCosts > 0 ? ((netProfit / totalFlowerCosts) * 100) : 0;
         
@@ -827,7 +848,7 @@ function renderQuoteSummary() {
                 Net Profit: £${netProfit.toFixed(2)} (${profitMargin.toFixed(1)}% margin on flowers)
             </div>
             <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.8;">
-                Breakdown: Floral Items £${totalSellingPrice.toFixed(2)} + Additional Services £${additionalCosts.toFixed(2)}
+                Breakdown: Floral Items £${grandTotal.toFixed(2)} + Additional Services £${additionalCosts.toFixed(2)}
             </div>
         `;
         quoteTotals.appendChild(grandTotalDiv);
@@ -1100,13 +1121,18 @@ function createNewQuote() {
             additionalCosts: {
                 headFloristDays: 2,
                 headFloristCost: 200,
+                headFloristBundle: true,
                 assistantDays: 1,
                 assistantCost: 150,
+                assistantBundle: true,
                 mileage: 0,
                 mileageCost: 0.45,
+                mileageBundle: true,
                 overnightStays: 0,
-                overnightCost: 0
-            }
+                overnightCost: 0,
+                overnightBundle: true
+            },
+            customCosts: []
         };
         
         renderAll();
@@ -1205,9 +1231,20 @@ function loadQuoteFromFile() {
         try {
             const quoteData = JSON.parse(e.target.result);
             
+            // Debug logging
+            console.log('Loaded quote data:', quoteData);
+            console.log('Has data property:', !!quoteData.data);
+            console.log('Has weddingDetails:', !!(quoteData.data && quoteData.data.weddingDetails));
+            
             // Validate quote data structure
             if (!quoteData.data || !quoteData.data.weddingDetails) {
-                throw new Error('Invalid quote file format');
+                console.error('Validation failed:', {
+                    hasData: !!quoteData.data,
+                    hasWeddingDetails: !!(quoteData.data && quoteData.data.weddingDetails),
+                    topLevelKeys: Object.keys(quoteData),
+                    dataKeys: quoteData.data ? Object.keys(quoteData.data) : 'No data property'
+                });
+                throw new Error('Invalid quote file format - missing data or weddingDetails structure');
             }
             
             // Load the quote data
@@ -1220,8 +1257,8 @@ function loadQuoteFromFile() {
             alert(`Quote "${quoteData.name}" loaded successfully from file!`);
             
         } catch (error) {
-            alert('Error loading quote file. Please make sure it\'s a valid quote file.');
-            console.error('File load error:', error);
+            console.error('Detailed file load error:', error);
+            alert(`Error loading quote file: ${error.message}\n\nPlease check the browser console for more details.`);
         }
     };
     
@@ -1325,7 +1362,8 @@ function createQuoteHTML() {
         
         // Bundled services line
         if (bundledTotal > 0) {
-            html += `<div class="total-row"><span>Additional Services:</span><span>£${bundledTotal.toFixed(2)}</span></div>`;
+            html += `<div class="total-row"><span>Design Fee, Delivery, Set up, Styling, Take Down:</span><span>£${bundledTotal.toFixed(2)}</span></div>`;
+            html += `<div class="total-row service-description"><span style="font-style: italic; font-size: 0.9rem; opacity: 0.8;">Includes florist's time (and assistant if required), travel and time for the florist to move and restyle floral arrangements across the venue throughout the day. Includes mileage and any travel expenses. Includes take-down, tidy and disposal.</span><span></span></div>`;
         }
         
         return html;
@@ -1354,19 +1392,22 @@ function createQuoteHTML() {
             color: #333;
             max-width: 800px;
             margin: 0 auto;
-            padding: 40px;
-            line-height: 1.6;
+            padding: 30px;
+            line-height: 1.4;
         }
         .quote-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #ed9696;
-            padding-bottom: 15px;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
         }
         .quote-header-left {
             flex: 1;
+            border-bottom: 3px solid #ed9696;
+            padding-bottom: 8px;
+            margin-right: 20px;
+            max-width: 60%;
         }
         .quote-header-right {
             flex-shrink: 0;
@@ -1378,37 +1419,39 @@ function createQuoteHTML() {
         }
         .quote-title {
             font-family: 'Black Mango', 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', cursive;
-            font-size: 2rem;
+            font-size: 1.6rem;
             color: #85837a;
-            margin: 0 0 5px 0;
+            margin: 0 0 2px 0;
             letter-spacing: 1px;
         }
         .quote-subtitle {
             font-family: 'Black Mango', 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', cursive;
-            font-size: 1.2rem;
+            font-size: 0.95rem;
             color: #ed9696;
-            margin: 10px 0;
+            margin: 2px 0 0 0;
             font-style: italic;
         }
         .quote-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
+            gap: 20px;
+            margin-bottom: 15px;
+            margin-top: 10px;
         }
         .quote-section h3 {
             font-family: 'Black Mango', 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', cursive;
-            font-size: 1.4rem;
+            font-size: 1.1rem;
             color: #85837a;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
+            margin-top: 0;
             text-transform: uppercase;
             letter-spacing: 1px;
             border-bottom: 2px solid #ed9696;
-            padding-bottom: 5px;
+            padding-bottom: 2px;
         }
         .quote-section p {
-            margin: 8px 0;
-            font-size: 1rem;
+            margin: 3px 0;
+            font-size: 0.85rem;
             color: #333;
         }
         .quote-section strong {
@@ -1416,16 +1459,20 @@ function createQuoteHTML() {
             font-weight: 600;
         }
         .quote-items {
-            margin: 40px 0;
+            margin: 15px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .quote-items h3 {
             font-family: 'Black Mango', 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', cursive;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             color: #85837a;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 1px;
+            page-break-after: avoid;
+            break-after: avoid;
         }
         .quote-table {
             width: 100%;
@@ -1435,6 +1482,8 @@ function createQuoteHTML() {
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .quote-table th {
             background: #85837a;
@@ -1473,6 +1522,10 @@ function createQuoteHTML() {
             border-radius: 8px;
             border: 2px solid #ed9696;
             margin: 30px 0;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-before: auto;
+            break-before: auto;
         }
         .quote-totals h3 {
             font-family: 'Black Mango', 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', cursive;
@@ -1482,6 +1535,8 @@ function createQuoteHTML() {
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 1px;
+            page-break-after: avoid;
+            break-after: avoid;
         }
         .total-row {
             display: flex;
@@ -1536,6 +1591,9 @@ function createQuoteHTML() {
         .terms-conditions {
             margin-top: 30px;
             page-break-before: always;
+            break-before: page;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .terms-conditions h3 {
             font-family: 'Black Mango', 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', cursive;
@@ -1554,6 +1612,8 @@ function createQuoteHTML() {
         }
         .terms-section {
             margin-bottom: 12px;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
         .terms-section h4 {
             font-family: 'Black Mango', 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', cursive;
@@ -1582,6 +1642,10 @@ function createQuoteHTML() {
             margin-top: 30px;
             padding-top: 20px;
             border-top: 2px solid #ed9696;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-before: avoid;
+            break-before: avoid;
         }
         .signature-row {
             display: flex;
@@ -1606,19 +1670,56 @@ function createQuoteHTML() {
         @media print {
             .quote-template {
                 background: white;
-                padding: 20px;
+                padding: 15px;
                 margin: 0;
                 max-width: none;
+                line-height: 1.3;
             }
             .quote-header {
+                margin-bottom: 6px;
+                padding-bottom: 2px;
+            }
+            .quote-header-left {
                 border-bottom: 2px solid #ed9696;
+                padding-bottom: 4px;
+                max-width: 65%;
+            }
+            .quote-details {
+                margin-bottom: 12px;
+                margin-top: 6px;
+                gap: 15px;
+            }
+            .quote-items {
+                margin: 12px 0;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .quote-section h3 {
+                margin-bottom: 6px;
+                font-size: 1rem;
+            }
+            .quote-section p {
+                margin: 2px 0;
+                font-size: 0.8rem;
             }
             .quote-table {
                 box-shadow: none;
                 border: 1px solid #ddd;
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
             .quote-totals {
                 border: 1px solid #ed9696;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .terms-conditions {
+                page-break-before: always;
+                break-before: page;
+            }
+            .signature-section {
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
         }
     </style>
@@ -1832,12 +1933,16 @@ function loadState() {
                 additionalCosts: loadedState.additionalCosts || {
                     headFloristDays: 2,
                     headFloristCost: 200,
+                    headFloristBundle: true,
                     assistantDays: 1,
                     assistantCost: 150,
+                    assistantBundle: true,
                     mileage: 0,
                     mileageCost: 0.45,
+                    mileageBundle: true,
                     overnightStays: 0,
-                    overnightCost: 0
+                    overnightCost: 0,
+                    overnightBundle: true
                 },
                 customCosts: loadedState.customCosts || []
             };
@@ -1865,12 +1970,16 @@ function loadState() {
                 additionalCosts: {
                     headFloristDays: 2,
                     headFloristCost: 200,
+                    headFloristBundle: true,
                     assistantDays: 1,
                     assistantCost: 150,
+                    assistantBundle: true,
                     mileage: 0,
                     mileageCost: 0.45,
+                    mileageBundle: true,
                     overnightStays: 0,
-                    overnightCost: 0
+                    overnightCost: 0,
+                    overnightBundle: true
                 },
                 customCosts: []
             };
@@ -1881,7 +1990,7 @@ function loadState() {
 // Clear all data (for testing)
 function clearAllData() {
     if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-        state = { 
+        state = {
             weddingDetails: {
                 brideName: '',
                 groomName: '',
@@ -1893,26 +2002,67 @@ function clearAllData() {
                 receptionVenue: '',
                 receptionTime: '',
                 tableCount: 0,
-                tableShape: ''
+                tableShape: '',
+                weddingBrief: ''
             },
-            flowers: [], 
-            items: [], 
-            assignments: {}, 
+            flowers: [],
+            items: [],
+            assignments: {},
             pricing: {},
             additionalCosts: {
                 headFloristDays: 2,
                 headFloristCost: 200,
+                headFloristBundle: true,
                 assistantDays: 1,
                 assistantCost: 150,
+                assistantBundle: true,
                 mileage: 0,
                 mileageCost: 0.45,
+                mileageBundle: true,
                 overnightStays: 0,
-                overnightCost: 0
-            }
+                overnightCost: 0,
+                overnightBundle: true
+            },
+            customCosts: []
         };
         localStorage.removeItem('floristryQuoteState');
         renderAll();
         renderWeddingDetails();
+        updateAdditionalCostTotals();
+    }
+}
+
+// Test function to load quote from text
+function testLoadQuoteFromText(jsonText) {
+    try {
+        const quoteData = JSON.parse(jsonText);
+        
+        console.log('Test load - Quote data:', quoteData);
+        console.log('Test load - Has data property:', !!quoteData.data);
+        console.log('Test load - Has weddingDetails:', !!(quoteData.data && quoteData.data.weddingDetails));
+        
+        if (!quoteData.data || !quoteData.data.weddingDetails) {
+            console.error('Test load - Validation failed:', {
+                hasData: !!quoteData.data,
+                hasWeddingDetails: !!(quoteData.data && quoteData.data.weddingDetails),
+                topLevelKeys: Object.keys(quoteData),
+                dataKeys: quoteData.data ? Object.keys(quoteData.data) : 'No data property'
+            });
+            throw new Error('Invalid quote file format - missing data or weddingDetails structure');
+        }
+        
+        // Load the quote data
+        state = JSON.parse(JSON.stringify(quoteData.data)); // Deep copy
+        renderAll();
+        renderWeddingDetails();
+        updateAdditionalCostTotals();
+        
+        alert(`Quote "${quoteData.name}" loaded successfully from test!`);
+        console.log('Test load successful!');
+        
+    } catch (error) {
+        console.error('Test load error:', error);
+        alert(`Test load error: ${error.message}`);
     }
 }
 
@@ -1923,4 +2073,5 @@ document.addEventListener('DOMContentLoaded', function() {
     clearBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: #dc3545; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; z-index: 1000;';
     clearBtn.onclick = clearAllData;
     document.body.appendChild(clearBtn);
+    
 });
